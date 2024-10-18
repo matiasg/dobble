@@ -1,6 +1,11 @@
 import galois
 
 
+def default_graph(i):
+    e0 = 0x1F600
+    return chr(e0 + i)
+
+
 def p2f_index(gf, x, y) -> int:
     order = gf.order
     if y is None:
@@ -33,9 +38,10 @@ def generate_cards(gf):
 
 def print_cards(gf):
     for cards in generate_cards(gf):
-        print(f"{cards}")
+        graphs = [default_graph(i) for i in cards]
+        print(f"{graphs}")
 
 
-order = 2
+order = 7
 GF = galois.GF(order)
 print_cards(GF)
