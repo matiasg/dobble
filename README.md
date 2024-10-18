@@ -1,10 +1,14 @@
-# dobble
+# Dobble
 
 A python script that produces [dobble](https://en.wikipedia.org/wiki/Dobble) sets of cards.
 
 As explained in the the Wikipedia page, the drawings in a set of `dobble` are points in $\mathbf{P^2}(\mathbb{F}_q)$,
 the projective plane of the Galois field $\mathbb{F}_q$.
-Links there explaine pretty well how this works, so I'm not giong to explain it here.
+The external links there explain pretty well how this works, so I'm not going to explain it here.
+(see
+[here](https://www.youtube.com/watch?v=VTDKqW_GLkw),
+[here](https://www.petercollingridge.co.uk/blog/mathematics-toys-and-games/dobble/) or
+[here](https://puzzlewocky.com/games/the-math-of-spot-it/)).
 Suffice it to say that $q$ is the power of a prime (either a prime, a prime squared, a prime cube, etc).
 Then there can be up to $q^2 + q + 1$ cards, each with $q + 1$ drawings. The number of drawings is
 $q^2 + q + 1$.
