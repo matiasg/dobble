@@ -41,7 +41,7 @@ def make_card(svgs, indices, end_size=300.0):
 
 def make_cards(svgs: list[tuple[Path, SVG]], order: int, outdir: Path):
     symbols = order**2 + order + 1
-    assert len(svgs) >= symbols, f"need at least {symbols} but got {len(svgs)}"
+    assert len(svgs) >= symbols, f"need at least {symbols} svgs but got {len(svgs)}"
     for i, card in enumerate(generate_cards(order)):
         print(f"doing card {i}")
         svg = make_card(svgs, card)
