@@ -30,3 +30,9 @@ $ python generate.py 2
 ['😁', '😃', '😆']
 ['😄', '😅', '😆']
 ```
+
+Also, `draw.py` generates cards from a directory with svg files (still rough cards)
+```sh
+$ python draw.py 2 svgs --outdir cards
+```
+takes at least 7 svg inside the `svgs` dir and outputs round cards in the `cards` directory.
