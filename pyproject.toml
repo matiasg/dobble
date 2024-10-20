@@ -1,4 +1,7 @@
 [project]
+dependencies = ["galois", "svgelements"]
 name = "dobble"
 version = "0.0.1"
-dependencies = ["galois"]
+
+[tool.setuptools.packages]
+find = {}
