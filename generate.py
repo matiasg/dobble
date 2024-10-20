@@ -24,11 +24,11 @@ def p2f_index(
     return int(x) + order * int(y)
 
 
-def generate_cards(gf: FieldArrayMeta):
+def generate_cards(order: int):
     """
-    Generates cards over Galois field `gf`
+    Generates cards over with `order + 1` symbols each
     """
-    order = gf.order
+    gf = galois.GF(order)
     for a in range(order):
         agf = gf(a)
         for b in range(order):
@@ -44,16 +44,14 @@ def generate_cards(gf: FieldArrayMeta):
     yield cards
 
 
-def print_cards(gf):
-    for cards in generate_cards(gf):
+def print_cards(order: int):
+    for cards in generate_cards(order):
         graphs = [default_graph(i) for i in cards]
         print(f"{graphs}")
 
 
 def main(args):
-    order = args.order
-    GF = galois.GF(order)
-    print_cards(GF)
+    print_cards(args.order)
 
 
 def parse_args():
