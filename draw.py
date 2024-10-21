@@ -1,6 +1,7 @@
 import logging
 import math
 from argparse import ArgumentParser
+from hashlib import sha1
 from itertools import count
 from pathlib import Path
 from typing import Iterator
@@ -18,26 +19,40 @@ def positions_generator(
 ) -> Iterator[tuple[float, float]]:
     theta = math.cos(2 * math.pi / N) + 1j * math.sin(2 * math.pi / N)
     for i in range(N):
-        pos = theta**i * 0.8 * end_size
+        pos = theta**i * 0.6 * end_size
         x = pos.real
         y = pos.imag
-        yield (x - sizes / 2 + end_size, y - sizes / 2 + end_size)
+        yield (x + end_size, y + end_size)
+
+
+def rotations_list(svgs: list[SVG]) -> list[float]:
+    return [2 * math.pi * sha1(repr(svg).encode()).digest()[0] / 256 for svg in svgs]
 
 
 def make_card(svgs, indices, end_size=300.0) -> SVG:
     out_svg = SVG(width=2 * end_size, height=2 * end_size)
     N = len(indices)
     sizes = end_size / math.sqrt(N)
-    for i, idx, (x, y) in zip(
-        count(), indices, positions_generator(N, sizes, end_size)
-    ):
+    rotations = rotations_list(svgs)
+    for (
+        i,
+        idx,
+        (x, y),
+    ) in zip(count(), indices, positions_generator(N, sizes, end_size)):
         svg_file, svg = svgs[idx]
+        rotation = rotations[idx]
         logger.info(
             "  using %s for card at pos %d: (x,y)=(%.3f, %.3f)", svg_file, i, x, y
         )
         size = max(svg.width, svg.height)
         for e in svg.elements():
-            out_svg.append(e * Matrix.scale(sizes / size) * Matrix.translate(x, y))
+            out_svg.append(
+                e
+                * Matrix.translate(-svg.width / 2, -svg.height / 2)
+                * Matrix.scale(sizes / size)
+                * Matrix.rotate(rotation)
+                * Matrix.translate(x, y)
+            )
     out_svg.append(
         Circle(
             center=Point(end_size, end_size),
