@@ -35,15 +35,14 @@ def rotations_list(svgs: list[tuple[Path, SVG]]) -> list[float]:
 def make_card(
     svgs: list[tuple[Path, SVG]],
     indices: list[int],
-    card_size: float = 300.0,
+    card_size: float,
+    sizes: list[float],
     margins: float = 40.0,
     stroke_width: float = 5.0,
 ) -> SVG:
     total_size = 2 * card_size + margins + stroke_width
     out_svg = SVG(width=total_size, height=total_size)
     N = len(indices)
-    sizes = sizes_list(svgs, card_size, N)
-    logger.info("sizes: %s", sizes)
     rotations = rotations_list(svgs)
     for i, idx, (x, y) in zip(
         count(), indices, positions_generator(N, sizes, card_size)
@@ -54,11 +53,13 @@ def make_card(
         logger.info(
             "  using %s for card at pos %d: (x,y)=(%.3f, %.3f)", svg_file, i, x, y
         )
-        original_size = max(svg.width, svg.height)
+        w, h = svg.width, svg.height
+        assert isinstance(w, float) and isinstance(h, float)
+        original_size = max(w, h)
         for e in svg.elements():
             out_svg.append(
                 e
-                * Matrix.translate(-svg.width / 2, -svg.height / 2)
+                * Matrix.translate(-w / 2, -h / 2)
                 * Matrix.scale(symbol_size / original_size)
                 * Matrix.rotate(rotation)
                 * Matrix.translate(x + margins, y + margins)
@@ -76,12 +77,15 @@ def make_card(
     return out_svg
 
 
-def make_cards(svgs: list[tuple[Path, SVG]], order: int, outdir: Path):
+def make_cards(
+    svgs: list[tuple[Path, SVG]], order: int, outdir: Path, card_size: float = 300.0
+):
     symbols = order**2 + order + 1
     assert len(svgs) >= symbols, f"need at least {symbols} svgs but got {len(svgs)}"
+    sizes = sizes_list(svgs, card_size=card_size, N=order)
     for i, card in enumerate(generate_cards(order)):
         logger.info("doing card %d", i)
-        svg = make_card(svgs, card)
+        svg = make_card(svgs, card, card_size=card_size, sizes=sizes)
         svg.write_xml(outdir / f"card_{i}.svg")
 
 
