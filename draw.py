@@ -15,50 +15,60 @@ logger = logging.getLogger(__name__)
 
 
 def positions_generator(
-    N: int, sizes: float, end_size: float
+    N: int, sizes: list[float], card_size: float, scale_margin: float = 0.8
 ) -> Iterator[tuple[float, float]]:
     theta = math.cos(2 * math.pi / N) + 1j * math.sin(2 * math.pi / N)
-    for i in range(N):
-        pos = theta**i * 0.6 * end_size
-        x = pos.real
-        y = pos.imag
-        yield (x + end_size, y + end_size)
+    for i, size in zip(count(), sizes):
+        pos = theta**i * scale_margin * (card_size - size / 2.0)
+        yield (pos.real + card_size, pos.imag + card_size)
 
 
-def rotations_list(svgs: list[SVG]) -> list[float]:
-    return [2 * math.pi * sha1(repr(svg).encode()).digest()[0] / 256 for svg in svgs]
+def sizes_list(svgs: list[tuple[Path, SVG]], card_size: float, N: int) -> list[float]:
+    hash_sizes = [0.5 + sha1(repr(svg).encode()).digest()[0] / 256 for _, svg in svgs]
+    return [s * card_size / math.sqrt(N) for s in hash_sizes]
 
 
-def make_card(svgs, indices, end_size=300.0) -> SVG:
-    out_svg = SVG(width=2 * end_size, height=2 * end_size)
+def rotations_list(svgs: list[tuple[Path, SVG]]) -> list[float]:
+    return [2 * math.pi * sha1(repr(svg).encode()).digest()[0] / 256 for _, svg in svgs]
+
+
+def make_card(
+    svgs: list[tuple[Path, SVG]],
+    indices: list[int],
+    card_size: float = 300.0,
+    margins: float = 40.0,
+    stroke_width: float = 5.0,
+) -> SVG:
+    total_size = 2 * card_size + margins + stroke_width
+    out_svg = SVG(width=total_size, height=total_size)
     N = len(indices)
-    sizes = end_size / math.sqrt(N)
+    sizes = sizes_list(svgs, card_size, N)
+    logger.info("sizes: %s", sizes)
     rotations = rotations_list(svgs)
-    for (
-        i,
-        idx,
-        (x, y),
-    ) in zip(count(), indices, positions_generator(N, sizes, end_size)):
+    for i, idx, (x, y) in zip(
+        count(), indices, positions_generator(N, sizes, card_size)
+    ):
         svg_file, svg = svgs[idx]
         rotation = rotations[idx]
+        symbol_size = sizes[idx]
         logger.info(
             "  using %s for card at pos %d: (x,y)=(%.3f, %.3f)", svg_file, i, x, y
         )
-        size = max(svg.width, svg.height)
+        original_size = max(svg.width, svg.height)
         for e in svg.elements():
             out_svg.append(
                 e
                 * Matrix.translate(-svg.width / 2, -svg.height / 2)
-                * Matrix.scale(sizes / size)
+                * Matrix.scale(symbol_size / original_size)
                 * Matrix.rotate(rotation)
-                * Matrix.translate(x, y)
+                * Matrix.translate(x + margins, y + margins)
             )
     out_svg.append(
         Circle(
-            center=Point(end_size, end_size),
-            r=end_size,
+            center=Point(card_size + margins, card_size + margins),
+            r=card_size,
             stroke="#000",
-            stroke_width=5,
+            stroke_width=stroke_width,
             fill="#fff",
             fill_opacity=0.2,
         )
