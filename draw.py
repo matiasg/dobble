@@ -44,12 +44,16 @@ def make_card(
     out_svg = SVG(width=total_size, height=total_size)
     N = len(indices)
     rotations = rotations_list(svgs)
-    for i, idx, (x, y) in zip(
-        count(), indices, positions_generator(N, sizes, card_size)
+    rotations = [rotations[idx] for idx in indices]
+    svgs = [svgs[idx] for idx in indices]
+    sizes = [sizes[idx] for idx in indices]
+    for i, (x, y), (svg_file, svg), rotation, symbol_size in zip(
+        count(),
+        positions_generator(N, sizes, card_size),
+        svgs,
+        rotations,
+        sizes,
     ):
-        svg_file, svg = svgs[idx]
-        rotation = rotations[idx]
-        symbol_size = sizes[idx]
         logger.info(
             "  using %s for card at pos %d: (x,y)=(%.3f, %.3f)", svg_file, i, x, y
         )
