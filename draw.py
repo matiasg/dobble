@@ -1,5 +1,6 @@
 import logging
 import math
+import random
 from argparse import ArgumentParser
 from hashlib import sha1
 from itertools import count
@@ -28,8 +29,8 @@ def sizes_list(svgs: list[tuple[Path, SVG]], card_size: float, N: int) -> list[f
     return [s * card_size / math.sqrt(N) for s in hash_sizes]
 
 
-def rotations_list(svgs: list[tuple[Path, SVG]]) -> list[float]:
-    return [2 * math.pi * sha1(repr(svg).encode()).digest()[0] / 256 for _, svg in svgs]
+def rotations_list(N: int):
+    return [2 * math.pi * random.random() for _ in range(N)]
 
 
 def make_card(
@@ -43,8 +44,7 @@ def make_card(
     total_size = 2 * card_size + margins + stroke_width
     out_svg = SVG(width=total_size, height=total_size)
     N = len(indices)
-    rotations = rotations_list(svgs)
-    rotations = [rotations[idx] for idx in indices]
+    rotations = rotations_list(N)
     svgs = [svgs[idx] for idx in indices]
     sizes = [sizes[idx] for idx in indices]
     for i, (x, y), (svg_file, svg), rotation, symbol_size in zip(
